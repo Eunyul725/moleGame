@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>악어의 입단속 Game play</title>
+    <style>
+        body, html{ width:100%;  height:100%; }
+        body, h1, div, button{ margin: 0; padding: 0; }
+        img{ display:block; }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+        body::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: url("image/bg.svg") no-repeat center center;
+            background-size: cover;
+            filter: blur(14px);
+            z-index: -1;
+        }
+        section { 
+            width:1024px; 
+            height:768px;  
+            background: url(image/bg.svg) no-repeat; 
+            border:1px solid #333;
+            display:flex; 
+            flex-flow:column nowrap; 
+            justify-content:center; 
+            align-items: center;
+            gap:40px; 
+            position: relative;
+        }
+        .play { position: relative; }
+        .play > .croc {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .play > .play_area {
+            width: 512px;   height: 332px;   margin:108px auto 0;  
+            position: absolute; top: 0; left: 0;
+        }
+        .m1 { 
+            width: 59px; height: auto; background: url("image/m_m1_hide.svg") no-repeat;
+            position: absolute; top: 95px; left: 342px;
+        }
+        .m2 { 
+            width: 63px; height: auto; background: url("image/m_m2_hide.svg") no-repeat; 
+            position: absolute; top: 76px; left: 425px;
+        }
+        .m3 { 
+            width: 63px; height: auto; background: url("image/m_m3_hide.svg") no-repeat; 
+            position: absolute; top: 76px; left: 539px;
+        }
+        .m4 { 
+            width: 59px; height: auto; background: url("image/m_m4_hide.svg") no-repeat; 
+            position: absolute; top: 94px; left: 627px;
+        }
+        .m5 { 
+            width: 59px; height: auto; background: url("image/m_m5_hide.svg") no-repeat; 
+            position: absolute; top: 389px; left: 342px;
+        }
+        .m6 { 
+            width: 63px; height: auto; background: url("image/m_m6_hide.svg") no-repeat; 
+            position: absolute; top: 404px; left: 425px;
+        }
+        .m7 { 
+            width: 63px; height: auto; background: url("image/m_m7_hide.svg") no-repeat;
+            position: absolute; top: 404px; left: 539px;
+        }
+        .m8 { 
+            width: 59px; height: auto; background: url("image/m_m8_hide.svg") no-repeat; 
+            position: absolute; top: 389px; left: 627px;
+        }
+        .play > .play_area > div > .mole{
+            width:100%;   height:100%;   /*  border-radius, overflow */
+        }
+        .play > .play_area > div > .mole > img{   display: none;   }
+        .play > .score{
+            width: 250px; height: 62px; object-fit: cover;
+            font-size: 70px; text-align:center;  font-weight:bold; 
+            background:url("image/score.svg") no-repeat center top;   padding-top:74px;
+            position:absolute;   left:30px;   top:15px;
+        }
+        .play > .time{
+            width: 214px; height: 88px; object-fit: cover; 
+            font-size: 70px; text-align: center;    font-weight: bold;
+            background:url("image/time.svg") no-repeat center top;  padding-top: 100px; 
+            position:absolute;  right:30px;  top: -11px;
+        }
+
+        .end{   display:none;   position: relative;  }
+        .end > .croc {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .end > h2{   width: 254px; height: 42px; object-fit: cover; position: absolute; right: 30px; top: 10px; }
+        .end > .score{
+            width: 308px; height: 76px; background:url("image/score.svg") no-repeat; object-fit: cover;
+            text-align: center;  font-weight: bold;  font-size: 80px; padding-top: 110px;
+            position: absolute; top: 0px; left: 30px;
+        }
+        .end > .more {
+            border: 0 none;  
+            background-color:transparent; 
+            cursor:pointer;
+            position: absolute;
+            bottom: -46px;
+            left: 40px;
+            transform: translateY(-75%);
+            border-radius: 60px;
+            transition: box-shadow 0.3s ease;
+        }
+        .end > .more > img {
+            width: 514px;
+            height: 126px;
+            object-fit: cover;
+        }
+        .end > .more:hover {
+            box-shadow: 0 0 30px #FFC931, 0 0 30px #FFC931;
+        }
+        .bird{   
+            position: absolute;  left: 0px;   top: 0px;   z-index: 1000;   transition: transform .05s;
+            pointer-events: none;  /*  background:#FFC931; */
+        }
+        .bird > img{   width: 122px;   height: 92px;   margin: -60px 0 0 -10px;  }
+    </style>
+</head>
+<body>
+    <section class="play">
+        <div class="croc"><img src="image/game_croc.svg" alt="악어" draggable="false"></div>
+        <div class="play_area">
+            <div class="m1">
+                <div class="mole"><img src="image/m_m1_show.svg" alt="충치1" draggable="false"></div>
+            </div>
+            <div class="m2">
+                <div class="mole"><img src="image/m_m2_show.svg" alt="충치2" draggable="false"></div>
+            </div>
+            <div class="m3">
+                <div class="mole"><img src="image/m_m3_show.svg" alt="충치3" draggable="false"></div>
+            </div>
+            <div class="m4">
+                <div class="mole"><img src="image/m_m4_show.svg" alt="충치4" draggable="false"></div>
+            </div>
+            <div class="m5">
+                <div class="mole"><img src="image/m_m5_show.svg" alt="충치5" draggable="false"></div>
+            </div>
+            <div class="m6">
+                <div class="mole"><img src="image/m_m6_show.svg" alt="충치6" draggable="false"></div>
+            </div>
+            <div class="m7">
+                <div class="mole"><img src="image/m_m7_show.svg" alt="충치7" draggable="false"></div>
+            </div>
+            <div class="m8">
+                <div class="mole"><img src="image/m_m8_show.svg" alt="충치8" draggable="false"></div>
+            </div>
+        </div>
+        <p class="score">0</p>
+        <p class="time">0</p>
+    </section>
+    <section class="end">
+        <div class="croc"><img src="image/result_croc.svg" alt="악어" draggable="false"></div>
+        <h2><img src="image/title.svg" alt="악어의 입단속" draggable="false"></h2>
+        <p class="score">0</p>
+        <button class="more"><img src="image/one_more.svg" alt="one more?" draggable="false"></button>
+    </section>
+    <span class="bird"><img src="image/bird.svg" alt="악어새" draggable="false"></span>
+
+    <script>
+        const hammer = document.querySelector('.bird');
+        //document.body.style.cursor = 'none';
+        document.addEventListener('mousemove', (e)=>{
+            hammer.style.left = e.clientX+'px';  //pageX(문서기준), offsetX(요소기준), clientX(브라우저 화면,뷰포트 기준)
+            hammer.style.top = e.clientY+'px';
+        });
+        document.addEventListener('mousedown', ()=>{
+            hammer.style.transform = 'rotate(-12deg)';
+        });
+        document.addEventListener('mouseup', ()=>{
+            hammer.style.transform = 'rotate(0deg)';
+        });
+        const timeArea = document.querySelector('.time');
+        const scoreArea = document.querySelector('.score');
+        const playStage = document.querySelector('.play');
+        const resultStage = document.querySelector('.end');  
+        
+        const countDownDisplay = document.createElement('div'); // countDownDisplay.classList.add('countdown')
+        countDownDisplay.style.position = 'fixed';
+        countDownDisplay.style.top = '0px';
+        countDownDisplay.style.left = '0px';
+        countDownDisplay.style.width = '100vw';
+        countDownDisplay.style.height = '100vh';
+        countDownDisplay.style.zIndex = '10000';
+        countDownDisplay.style.backgroundColor = 'rgba(0,0,0,0.7)';
+        countDownDisplay.style.display = 'flex';
+        countDownDisplay.style.justifyContent = 'center';
+        countDownDisplay.style.alignItems = 'center';
+        countDownDisplay.style.fontSize = '100px';
+        countDownDisplay.style.color = '#ffffff';
+        countDownDisplay.style.fontWeight = 'bold';
+        document.body.appendChild( countDownDisplay );
+        hammer.style.display = 'none';
+        //document.body.style.cursor = 'default';
+        let startCountDown = 5;
+    
+        const startCount=()=>{
+            countDownDisplay.innerHTML = startCountDown;
+            startCountDown--;
+            if( startCountDown === -1 ){
+                countDownDisplay.innerHTML = 'START'
+            }
+            if( startCountDown < -1 ){
+                clearInterval( gameBegin );
+                startGame();
+            }
+        }
+        startCount();
+        let gameBegin = setInterval( startCount, 1000 );
+    
+        let playTime = 15;
+        let gameScore = 0;
+        let nameNum; // .m~ 이름 숫자 랜덤정의 변수
+        let clickable = false;// 1번만 클릭할 수있게 구분하는 (연속클릭방지) 상태변수 선언 ( true/false )
+        let timer;
+        let targetTimer;
+    
+        const startGame=()=>{
+            hammer.style.display = 'block';
+            document.body.style.cursor = 'none';
+            countDownDisplay.style.display = 'none';
+            scoreArea.innerHTML = gameScore;
+            countDown();    
+            timer = setInterval( countDown, 1500 );
+            targetTimer = setInterval(randomTarget, 1200);
+        }
+        
+        const countDown=()=>{
+            timeArea.innerHTML = playTime;
+            playTime--;
+            if( playTime<0 ){
+                clearInterval(timer);
+                clearInterval(targetTimer);
+                playStage.style.display = 'none';
+                resultStage.style.display = 'block';
+                document.querySelector('.end .score').innerHTML = gameScore*10;
+                hammer.style.display = 'none';
+                document.body.style.cursor = 'default';
+            }
+        }
+        
+        const randomTarget=()=>{
+            nameNum = Math.ceil( Math.random()*8 )// 1~9 사이 정수 랜덤   Math.floor( Math.random()*9 )+1
+            const target = document.querySelector(`.m${nameNum} img`);
+            target.style.display = 'block';
+            clickable = true; // 보여지는 순간 클릭가능한 상태로 변수 선언
+            setTimeout(()=>{  target.style.display='none';  clickable=false; }, 800); // 0.8초 뒤에 사라지는 명령 : 시간=난이도
+        }
+        
+        document.querySelectorAll('.mole>img').forEach((img)=>{ // 배열요소에 클릭이벤트 적용  forEach함수 활용
+            img.addEventListener('mousedown', ()=>{
+                if( clickable ){ // true일때만 실행
+                gameScore++;
+                scoreArea.innerHTML = gameScore*10;
+                clickable = false;  // 클릭한번 이후는 클릭가능상태 해제( false선언 )
+                }
+            });
+        });
+    
+        document.querySelector('.end .more').addEventListener('click',()=>{
+            window.location.reload();
+            // 모든 변수값 초기값으로 재 선언( 시간:10초,점수:0 )후 출력, 카운트다운 재시작, 랜덤타겟 재시작
+        })
+    </script>
+</body>
+</html>
